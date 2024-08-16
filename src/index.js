@@ -1,24 +1,28 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const bodyParser = require("body-parser");
 
-const {PORT} = require('./config/serverConfig')
-const ApiRoutes = require('./routes/index');
+const { PORT } = require("./config/serverConfig");
+const ApiRoutes = require("./routes/index");
+
+const db = require("./models/index");
 
 const setupAndStartServer = async () => {
+  // create the express Object
 
-    // create the express Object
+  const app = express();
 
-    const app = express();
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended: true}));
+  app.use("/api", ApiRoutes);
 
-    app.use('/api', ApiRoutes);
+  app.listen(PORT, async () => {
+    console.log(`server at the PORT ${PORT}`);
 
-    app.listen(PORT, async () => {
-        console.log(`server at the PORT ${PORT}`);
-       
-    })
-}
+    if (process.env.SYNC_DB) {
+      db.sequelize.sync({ alter: true });
+    }
+  });
+};
 
 setupAndStartServer();
